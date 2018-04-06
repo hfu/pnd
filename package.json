@@ -1,0 +1,26 @@
+{
+  "name": "pnd",
+  "version": "1.0.0",
+  "description": "PostGIS to NDJSON, now with pg-postgis-types ## .env ``` PGUSER=user PGHOST=db.example.com PGPASSWORD=secretpassword PGDATABASE=database PGPORT=5432 Z=5 X=18 Y=15 TABLE=places GEOM=geometry ```",
+  "main": "pnd.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hfu/pnd.git"
+  },
+  "author": "",
+  "license": "Unlicense",
+  "bugs": {
+    "url": "https://github.com/hfu/pnd/issues"
+  },
+  "homepage": "https://github.com/hfu/pnd#readme",
+  "dependencies": {
+    "@mapbox/tilebelt": "^1.0.1",
+    "@turf/turf": "^5.1.6",
+    "dotenv": "^5.0.1",
+    "pg": "^7.4.1",
+    "wkx": "^0.4.4"
+  }
+}
