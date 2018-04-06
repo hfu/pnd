@@ -31,7 +31,6 @@ const pnd = async function (layer) {
         //tippecanoe: {layer: row.g.type.toLowerCase().replace('multi', '')}
         tippecanoe: {layer: layer}
       }
-      delete row.g
       delete row[geom]
       for(const k of deletes) {
         delete row[k]
