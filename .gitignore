@@ -1,3 +1,6 @@
+*.ndjson
+*.mbtiles
+_json.js
 # Logs
 logs
 *.log

@@ -1,5 +1,5 @@
 # pnd
-PostGIS to NDJSON, now with pg-postgis-types
+PostGIS to NDJSON, now with wkx
 ## .env
 ```
 PGUSER=user
@@ -10,7 +10,7 @@ PGPORT=5432
 Z=5
 X=18
 Y=15
-TABLE=places
+TABLES=[['places', 2, 8, []]]
 GEOM=geometry
 DELETES=
 ```

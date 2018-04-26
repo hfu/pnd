@@ -6,13 +6,12 @@ const wkx = require('wkx')
 const z = parseInt(process.env.Z)
 const x = parseInt(process.env.X)
 const y = parseInt(process.env.Y)
-const tables = process.env.TABLES.split(' ')
-const deletes = process.env.DELETES.split(' ')
+const tables = JSON.parse(process.env.TABLES)
 const geom = process.env.GEOM
 const pool = new Pool({max: 50})
 const bbox = tilebelt.tileToBBOX([x, y, z])
 
-const pnd = async function (layer) {
+const pnd = async function (layer, minzoom, maxzoom, properties) {
   const client = await pool.connect()
   let q = `SELECT * FROM ${layer}`
   q += ` WHERE ${geom} && ST_MakeBox2D(` +
@@ -28,16 +27,14 @@ const pnd = async function (layer) {
       let f = {
         type: 'Feature',
         geometry: g,
-        //tippecanoe: {layer: row.g.type.toLowerCase().replace('multi', '')}
-        tippecanoe: {layer: layer}
+        tippecanoe: {layer: g.type.toLowerCase().replace('multi', ''),
+          minzoom: minzoom, maxzoom: maxzoom}
+        //tippecanoe: {layer: layer, minzoom: minzoom, maxzoom: maxzoom}
       }
       delete row[geom]
-      for(const k of deletes) {
-        delete row[k]
-      }
-      f.properties = row
-      f.properties.layer = layer //
-      //f.properties = {layer: layer}
+      // f.properties = row
+      // f.properties.layer = layer
+      f.properties = {layer: layer}
       console.log(JSON.stringify(f))
     })
     .on('end', () => {
@@ -45,6 +42,6 @@ const pnd = async function (layer) {
     })
 }
 
-for (const layer of tables) {
-  pnd(layer)
+for (const t of tables) {
+  pnd(t[0], t[1], t[2], t[3])
 }
