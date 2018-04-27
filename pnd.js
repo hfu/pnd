@@ -1,18 +1,25 @@
-require('dotenv').config()
+const config = require('config')
 const { Pool, Query } = require('pg')
 const tilebelt = require('@mapbox/tilebelt')
 const turf = require('@turf/turf')
 const wkx = require('wkx')
-const z = parseInt(process.env.Z)
-const x = parseInt(process.env.X)
-const y = parseInt(process.env.Y)
-const tables = JSON.parse(process.env.TABLES)
-const geom = process.env.GEOM
-const pool = new Pool({max: 50})
+const z = config.get('z')
+const x = config.get('x')
+const y = config.get('y')
+const geoms = config.get('geom')
+const data = config.get('data')
+let pools = {}
+for (let database of Object.keys(data)) {
+  pools[database] = new Pool({
+    host: config.get('host'), user: config.get('user'), 
+    password: config.get('password'), database: database, max: 50
+  })
+}
 const bbox = tilebelt.tileToBBOX([x, y, z])
 
-const pnd = async function (layer, minzoom, maxzoom, properties) {
-  const client = await pool.connect()
+const pnd = async function (database, layer, minzoom, maxzoom, text_key) {
+  const client = await pools[database].connect()
+  const geom = geoms[database]
   let q = `SELECT * FROM ${layer}`
   q += ` WHERE ${geom} && ST_MakeBox2D(` +
     `ST_MakePoint(${bbox[0]}, ${bbox[1]}), ` +
@@ -33,8 +40,10 @@ const pnd = async function (layer, minzoom, maxzoom, properties) {
       }
       delete row[geom]
       // f.properties = row
-      // f.properties.layer = layer
-      f.properties = {layer: layer}
+      f.properties = {}
+      if (text_key) f.properties.text = row[text_key]
+      f.properties.layer = layer
+      // f.properties = {layer: layer}
       console.log(JSON.stringify(f))
     })
     .on('end', () => {
@@ -42,6 +51,8 @@ const pnd = async function (layer, minzoom, maxzoom, properties) {
     })
 }
 
-for (const t of tables) {
-  pnd(t[0], t[1], t[2], t[3])
+for (const database of Object.keys(data)) {
+  for(const t of data[database]) {
+    pnd(database, t[0], t[1], t[2], t[3])
+  }
 }
