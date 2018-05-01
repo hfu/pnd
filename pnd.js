@@ -27,8 +27,9 @@ const pnd = async function (database, layer, minzoom, maxzoom, text_key) {
   await client.query(new Query(q))
     .on('row', row => {
       let g = wkx.Geometry.parse(new Buffer(row[geom], 'hex')).toGeoJSON()
-      if (g.type === 'Point') {
+      if (g.type === 'Point' || g.coordinates.length === 0) {
       } else {
+        // console.log(`clipping ${JSON.stringify(g)}`)
         g = turf.bboxClip(g, bbox).geometry
       }
       let f = {
