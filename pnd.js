@@ -63,7 +63,7 @@ const pnd = async function (module) {
     }
   }
   stream.on('close', () => {
-    console.log('closed! starting tippecanoe.')
+    console.log('starting tippecanoe.')
     const tippecanoe = spawnSync('../tippecanoe/tippecanoe', [
       '--read-parallel',
       '--simplify-only-low-zooms', '--simplification=4', '--minimum-zoom=3',

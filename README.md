@@ -1,5 +1,13 @@
 # pnd
-PostGIS to NDJSON, with pg, turf, wkx, tilebelt and node-config
+PostGIS to NDJSON then to mbtiles, with pg, turf, wkx, tilebelt, node-config and tippecanoe.
+
+## usage
+```sh
+$ vi config/default.hjson
+$ node pnd.js
+```
+pnd.js spawns ../tippecanoe/tippecanoe now.
+
 ## config/default.hjson
 ```
 {
@@ -26,11 +34,6 @@ PostGIS to NDJSON, with pg, turf, wkx, tilebelt and node-config
     ]
   }
 }
-```
-## tippecanoe
-After you get NDJSON data, you may want to convert them to .mbtiles of vector tiles using tippecanoe, like:
-```
-tippecanoe --read-parallel --simplify-only-low-zooms --simplification=4 --minimum-zoom=3 --maximum-zoom=14 --base-zoom=14 -f --output=5-18-15.mbtiles 5-18-15.ndjson
 ```
 
 Happy tile-baking!
