@@ -6,9 +6,7 @@ PostGIS to NDJSON, with pg, turf, wkx, tilebelt and node-config
   host: pghost.example.com
   user: pguser
   password: pgpassword
-  z: 5
-  x: 18
-  y: 15
+  modules: [[5, 18, 15], [5, 18, 14]]
   geom: {
     db1: geom
     db2: geomtype
