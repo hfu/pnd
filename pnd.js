@@ -7,18 +7,17 @@ const fs = require('fs')
 const cpq = require('childprocess-queue')
 const data = config.get('data')
 
-cpq.setMaxProcesses(3)
+cpq.setMaxProcesses(1)
 let pools = {}
 for (let database of Object.keys(data)) {
   pools[database] = new Pool({
     host: config.get('host'), user: config.get('user'), 
-    password: config.get('password'), database: database, max: 500
+    password: config.get('password'), database: database, max: 1000
   })
 }
 
 const pnd = async function (module) {
   const stream = fs.createWriteStream(`${module.join('-')}.ndjson`)
-  console.log(`new file ${module.join('-')}.ndjson`)
   const bbox = tilebelt.tileToBBOX([module[1], module[2], module[0]])
   let layer_count = 0
   for (const database of Object.keys(data)) {
@@ -36,7 +35,6 @@ const pnd = async function (module) {
           let g = wkx.Geometry.parse(new Buffer(row[geom], 'hex')).toGeoJSON()
           if (g.type === 'Point' || g.coordinates.length === 0) {
           } else {
-            // console.log(`clipping ${JSON.stringify(g)}`)
             g = turf.bboxClip(g, bbox).geometry
           }
           let f = {
@@ -52,11 +50,9 @@ const pnd = async function (module) {
           if (text_key) f.properties.text = row[text_key]
           f.properties.layer = layer
           // f.properties = {layer: layer}
-          // console.log(JSON.stringify(f))
           stream.write(JSON.stringify(f) + '\n')
         })
         .on('end', () => {
-          // console.log(`finished ${module.join('-')} ${t} (${layer_count})`)
           layer_count -= 1
           client.end()
           if(layer_count === 0) stream.end()
@@ -64,22 +60,32 @@ const pnd = async function (module) {
     }
   }
   stream.on('close', () => {
-    console.log('starting tippecanoe.')
-    const tippecanoe = cpq.spawn('nice', ['-19', '../tippecanoe/tippecanoe', 
+    cpq.spawn('nice', ['-19', '../tippecanoe/tippecanoe', 
       '--read-parallel',
       '--simplify-only-low-zooms', '--simplification=4', '--minimum-zoom=5',
       '--maximum-zoom=16', '--base-zoom=16', '-f', 
       `--output=${module.join('-')}.mbtiles`, `${module.join('-')}.ndjson`], 
-      {stdio: 'inherit'})
-    console.log(tippecanoe)
-    console.log(`process ${cpq.getCurrentProcessCount()}/${cpq.getMaxProcesses()}`)
+      {
+        stdio: 'inherit',
+        onCreate: (proc) => {
+          proc.on('close', (code) => {
+            console.log(`${proc.spawnargs[11]} finished. ` + 
+              `${cpq.getCurrentProcessCount()} active, ` +
+              `${cpq.getCurrentQueueSize()} in queue.`)
+          })
+        }
+      })
+    console.log(`pushed a tippecanoe process: ` + 
+      `${cpq.getCurrentProcessCount()} of ${cpq.getMaxProcesses()} ` + 
+      `active, ${cpq.getCurrentQueueSize()} in queue.`)
   })
 }
 
 async function main() {
+  let ct = 0
   for (const module of config.get('modules')) {
-    // if (fs.existsSync(`${module.join('-')}.mbtiles`)) continue
-    // console.log(`pushing ${module.join('-')}`)
+    ct += 1
+    console.log(`pushing #${ct} ${module.join('-')}`)
     await pnd(module) 
   }
 }
