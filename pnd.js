@@ -26,8 +26,7 @@ const pnd = async function (module) {
   let layerCount = 0
   for (const database of Object.keys(data)) {
     layerCount += data[database].length
-    for (const t of data[database]) {
-      const [layer, minzoom, maxzoom, textKey] = t
+    for (const layer of data[database]) {
       const client = await pools[database].connect()
       const geom = config.get('geom')[database]
       let q = `SELECT * FROM ${layer}`
@@ -44,14 +43,11 @@ const pnd = async function (module) {
           delete row[geom]
           let properties = row
           properties._layer = layer
-          if (textKey) properties.text = row[textKey]
           let f = {
             type: 'Feature',
             geometry: g,
             tippecanoe: {
-              layer: g.type.toLowerCase().replace('multi', ''),
-              minzoom: minzoom,
-              maxzoom: maxzoom
+              layer: g.type.toLowerCase().replace('multi', '')
             },
             properties: properties
           }

@@ -1,15 +1,18 @@
 # pnd
 PostGIS to NDJSON then to mbtiles, with pg, turf, wkx, tilebelt, node-config and tippecanoe.
 
+Now using [modify](https://github.com/hfu/modify-spec)
+
 ## usage
 ```sh
 $ vi config/default.hjson
 $ vi modify.js
 $ node pnd.js
 ```
-pnd.js spawns ../tippecanoe/tippecanoe now.
+pnd.js spawns ../tippecanoe/tippecanoe automatically.
 
 ## example config/default.hjson
+This config file contains PostGIS connection parameters and relations metadata.
 ```
 {
   host: pghost.example.com
@@ -22,22 +25,19 @@ pnd.js spawns ../tippecanoe/tippecanoe now.
   }
   data: {
     db1: [
-      ['table_for_z_0_to_6', 0, 6, null]
-      ['table_for_z_11_to_14', 11, 14, null]
-
-      ['annotation_using_poiname', 6, 14, 'poiname']
-      ['annotation_using_placename1', 8, 14, 'placename1']
+      table1
+      table2
     ]
     db2: [
-      ['osm_planet_water', 10, 14, null]
-      ['osm_planet_major_roads', 10, 14, null]
-      ['osm_planet_pois_other', 13, 14, 'name']
+      table3
+      table4
     ]
   }
 }
 ```
 
 ## example modify.js
+This file contains a function to modify features; like adding minzoom and maxzoom, setting up layer name, or filtering properties.
 ```js
 module.exports = (f) => {
   if (f.properties.text) {
