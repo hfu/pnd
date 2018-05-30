@@ -4,11 +4,12 @@ PostGIS to NDJSON then to mbtiles, with pg, turf, wkx, tilebelt, node-config and
 ## usage
 ```sh
 $ vi config/default.hjson
+$ vi modify.js
 $ node pnd.js
 ```
 pnd.js spawns ../tippecanoe/tippecanoe now.
 
-## config/default.hjson
+## example config/default.hjson
 ```
 {
   host: pghost.example.com
@@ -33,6 +34,18 @@ pnd.js spawns ../tippecanoe/tippecanoe now.
       ['osm_planet_pois_other', 13, 14, 'name']
     ]
   }
+}
+```
+
+## example modify.js
+```js
+module.exports = (f) => {
+  if (f.properties.text) {
+    f.properties = {text: f.properties.text}
+  } else {
+    f.properties = {}
+  }
+  return f
 }
 ```
 
