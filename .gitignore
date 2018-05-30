@@ -1,7 +1,8 @@
 *.ndjson
 *.mbtiles
-_json.js
-configure
+modify.js
+config/
+
 # Logs
 logs
 *.log
