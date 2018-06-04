@@ -81,7 +81,7 @@ const pnd = async function (module) {
         })
       }
     })
-    console.log(`pushed a tippecanoe process: ` +
+    console.log(`started a tippecanoe process: ` +
       `${cpq.getCurrentProcessCount()} of ${cpq.getMaxProcesses()} ` +
       `active, ${cpq.getCurrentQueueSize()} in queue.`)
   })
@@ -91,7 +91,7 @@ async function main () {
   let ct = 0
   for (const module of config.get('modules')) {
     ct += 1
-    console.log(`pushing #${ct} ${module.join('-')}`)
+    console.log(`importing #${ct} ${module.join('-')}`)
     await pnd(module)
   }
 }
