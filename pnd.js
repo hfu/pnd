@@ -5,8 +5,13 @@ const turf = require('@turf/turf')
 const wkx = require('wkx')
 const fs = require('fs')
 const cpq = require('childprocess-queue')
-const modify = require('./modify.js')
 const data = config.get('data')
+let modify
+if (fs.existsSync('./modify.js')) {
+  modify = require('./modify.js')
+} else {
+  modify = f => {return f}
+}
 
 cpq.setMaxProcesses(1)
 let pools = {}
