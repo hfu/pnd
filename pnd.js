@@ -26,6 +26,7 @@ for (let database of Object.keys(data)) {
 }
 
 const pnd = async function (module) {
+  const startTime = new Date()
   const stream = fs.createWriteStream(`${module.join('-')}.ndjson`)
   const bbox = tilebelt.tileToBBOX([module[1], module[2], module[0]])
   let layerCount = 0
@@ -75,6 +76,10 @@ const pnd = async function (module) {
       stdio: 'inherit',
       onCreate: (proc) => {
         proc.on('close', (code) => {
+          console.log(
+            `${module.join('-')} took ` + 
+            `${((new Date()).getTime() - startTime.getTime()) / 1000}s.`
+          )
           console.log(`${proc.spawnargs[11]} finished. ` +
               `${cpq.getCurrentProcessCount()} active, ` +
               `${cpq.getCurrentQueueSize()} in queue.`)
