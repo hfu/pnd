@@ -35,7 +35,7 @@ const pnd = async function (module) {
     for (const layer of data[database]) {
       const client = await pools[database].connect()
       client.on('error', err => {
-        console.error('client caught an error: ', err.stack)
+        console.error(`${module.join('-')} client caught an error: `, err.stack)
       })
       const geom = config.get('geom')[database]
       let q = `WITH envelope AS (` +
