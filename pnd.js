@@ -68,7 +68,7 @@ const pnd = async function (module) {
           stream.write(JSON.stringify(modify(f)) + '\n')
         })
         .on('error', err => {
-          console.error(err)
+          console.error(`${layer}/${module.join('-')} query: ${err.stack}`)
         })
         .on('end', () => {
           layerCount -= 1
