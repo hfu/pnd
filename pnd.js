@@ -74,7 +74,7 @@ const pnd = async function (module) {
   stream.on('close', () => {
     cpq.spawn('nice', ['-19', 'tippecanoe',
       '--read-parallel',
-      '--simplify-only-low-zooms', '--simplification=4', '--minimum-zoom=5',
+      '--simplify-only-low-zooms', '--simplification=4', '--minimum-zoom=8',
       '--maximum-zoom=16', '--base-zoom=16', '-f',
       `--output=${module.join('-')}.mbtiles`, `${module.join('-')}.ndjson`],
     {
