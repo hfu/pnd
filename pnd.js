@@ -1,7 +1,7 @@
 const config = require('config')
 const { Pool, Query } = require('pg')
 const tilebelt = require('@mapbox/tilebelt')
-const turf = require('@turf/turf')
+// const turf = require('@turf/turf')
 const wkx = require('wkx')
 const fs = require('fs')
 const cpq = require('childprocess-queue')
@@ -35,17 +35,22 @@ const pnd = async function (module) {
     for (const layer of data[database]) {
       const client = await pools[database].connect()
       const geom = config.get('geom')[database]
-      let q = `SELECT * FROM ${layer}`
-      q += ` WHERE ${geom} && ST_MakeBox2D(` +
-        `ST_MakePoint(${bbox[0]}, ${bbox[1]}), ` +
-        `ST_MakePoint(${bbox[2]}, ${bbox[3]}))`
+      let q = `WITH envelope AS (` +
+        `  SELECT ST_MakeEnvelope(${bbox.join(', ')}, 4326) as geom` +
+        `)` + 
+        `SELECT *, ` +
+        `  ST_Intersection(${layer}.geom, envelope.geom) as geom ` +
+        `FROM ${layer} ` +
+        `JOIN envelope ` +
+        `ON ${layer}.${geom} && envelope.geom `
       await client.query(new Query(q))
         .on('row', row => {
           let g = wkx.Geometry.parse(Buffer.from(row[geom], 'hex')).toGeoJSON()
+          /* no longer necessary because this is done at PostGIS server
           if (g.type === 'Point' || g.coordinates.length === 0) {
           } else {
             g = turf.bboxClip(g, bbox).geometry
-          }
+          } */
           delete row[geom]
           let properties = row
           properties._layer = layer
