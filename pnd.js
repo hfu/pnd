@@ -13,7 +13,7 @@ if (fs.existsSync('./modify.js')) {
   modify = f => {return f}
 }
 
-cpq.setMaxProcesses(3)
+cpq.setMaxProcesses(1)
 let pools = {}
 for (let database of Object.keys(data)) {
   pools[database] = new Pool({
@@ -34,6 +34,9 @@ const pnd = async function (module) {
     layerCount += data[database].length
     for (const layer of data[database]) {
       const client = await pools[database].connect()
+      client.on('error', err => {
+        console.error('client caught an error: ', err.stack)
+      })
       const geom = config.get('geom')[database]
       let q = `WITH envelope AS (` +
         `  SELECT ST_MakeEnvelope(${bbox.join(', ')}, 4326) as geom` +
@@ -63,6 +66,9 @@ const pnd = async function (module) {
             properties: properties
           }
           stream.write(JSON.stringify(modify(f)) + '\n')
+        })
+        .on('error', err => {
+          console.error(err)
         })
         .on('end', () => {
           layerCount -= 1
@@ -99,7 +105,9 @@ const pnd = async function (module) {
 
 async function main () {
   let ct = 0
-  for (const module of config.get('modules')) {
+  for (const module of config.get('modules').sort(() => {
+      return Math.random() - .5 
+    })) {
     ct += 1
     console.log(`importing #${ct} ${module.join('-')}`)
     await pnd(module)
