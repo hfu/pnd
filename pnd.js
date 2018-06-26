@@ -13,7 +13,7 @@ if (fs.existsSync('./modify.js')) {
   modify = f => {return f}
 }
 
-cpq.setMaxProcesses(1)
+cpq.setMaxProcesses(3)
 let pools = {}
 for (let database of Object.keys(data)) {
   pools[database] = new Pool({
@@ -21,7 +21,7 @@ for (let database of Object.keys(data)) {
     user: config.get('user'),
     password: config.get('password'),
     database: database,
-    max: 1000
+    max: 8000
   })
 }
 
@@ -73,8 +73,8 @@ const pnd = async function (module) {
   }
   stream.on('close', () => {
     cpq.spawn('nice', ['-19', 'tippecanoe',
-      '--read-parallel',
-      '--simplify-only-low-zooms', '--simplification=4', '--minimum-zoom=8',
+      '--quiet', '--read-parallel',
+      '--simplify-only-low-zooms', '--simplification=4', '--minimum-zoom=5',
       '--maximum-zoom=16', '--base-zoom=16', '-f',
       `--output=${module.join('-')}.mbtiles`, `${module.join('-')}.ndjson`],
     {
@@ -85,7 +85,7 @@ const pnd = async function (module) {
             `${module.join('-')} took ` + 
             `${((new Date()).getTime() - startTime.getTime()) / 1000}s.`
           )
-          console.log(`${proc.spawnargs[11]} finished. ` +
+          console.log(`${module.join('-')} finished. ` +
               `${cpq.getCurrentProcessCount()} active, ` +
               `${cpq.getCurrentQueueSize()} in queue.`)
         })
